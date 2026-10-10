@@ -1,7 +1,9 @@
 # csharp-learn
 
-スマホ1台で学べる C# 入門。ビルド不要の静的アプリで、**進捗はブラウザに自動保存**します。
-ホームページの `others/csharp-learn/` に埋め込んでいます。
+スマホ1台で学べる C# 入門ドリル。ビルド不要の静的アプリ（HTML + CSS + JS のみ）で、
+進捗はブラウザに自動保存します。
+
+**公開ページ: https://kanon-server.com/others/csharp-learn/**
 
 ## 特徴
 
@@ -12,8 +14,7 @@
 - 進捗（解答状況・完了・レベル・最後のレッスン・演習成績）を `localStorage` に保存
 - 進捗の**書き出し / 読み込み**（JSON）と、レベルチェックのやり直し
 - モバイル最優先のUI（大きめのタップ領域、下部固定ナビ、セーフエリア対応、入力欄は16pxで自動拡大を防止）
-- 左上に **others へ戻るリンク**（サイトの作法に合わせて `../`）
-- 依存なし・ビルドなし（HTML + CSS + JS のみ）
+- 依存なし・ビルドなし（ブラウザだけで完結）
 
 ## 扱う範囲
 
@@ -41,45 +42,39 @@
 | Lv.2 基礎 | 4–6 | 条件分岐 if / else |
 | Lv.3 経験者 | 7–10 | クラスとオブジェクト |
 
-## 使い方
-
-```sh
-# ローカルで確認
-nix run .              # http://localhost:8000 で配信
-nix run . -- 8080      # ポート指定
-# もしくは
-python3 -m http.server 8000
-```
-
-ブラウザで開き、レッスンを読んでクイズに答えるだけ。進捗は自動保存されます。
-
 ## 構成
 
 ```
-index.html    画面の枠（#app に描画）
-style.css     モバイル最優先のスタイル（ダーク）
-lessons.js    レッスン本文・コード・クイズのデータ
-app.js        ルーティング(#/l/<id>)・クイズ判定・進捗保存・エクスポート
+index.html              画面の枠（#app に描画）
+style.css               モバイル最優先のスタイル（ダーク）
+lessons.js              基礎編のレッスン・クイズデータ
+lessons-advanced.js     アドバンス編（lessons.js の LESSONS に追加される）
+app.js                  ルーティング(#/l/<id>, #/check, #/drill)・判定・進捗保存
+flake.nix / flake.lock  開発時に静的配信するための flake（任意）
 ```
 
 ## 進捗の保存について
 
 - 保存先は `localStorage` のキー `csharp-learn:v1`（その端末のブラウザ単位）。
-- 保存される内容: 各レッスンの解答、完了状況、最後のレッスン、更新日時。
+- 保存される内容: 各レッスンの解答、完了状況、レベル、最後のレッスン、演習成績。
 - サーバーには何も送りません（完全にローカル）。
 - 「書き出す」で `csharp-learn-progress.json` を保存、「読み込む」で復元できます。
 
-## ホームページへの埋め込み
+## 動かすには（任意）
 
-静的ファイルなので、そのままコピーするだけ。`others/index.html` の一覧の**一番下**に `<li>` を追加します。
+ビルドもサーバーも不要で、`index.html` をブラウザで開けばそのまま動きます。
+配信して確認したい場合だけ、静的サーバーを立ててください。
 
 ```sh
-cp -r . ../homepage/others/csharp-learn/
+nix run . -- 8080          # http://localhost:8080 で配信（flake を使う場合）
+# または
+python3 -m http.server 8080
 ```
 
 ## レッスンを足すには
 
-`lessons.js` の配列に 1 つ追加するだけです。
+`lessons.js`（または `lessons-advanced.js`）の配列に 1 つ追加するだけです。本文中のコードは
+`<pre class="code" data-code>` で書くとハイライトされます。
 
 ```js
 {
@@ -87,9 +82,10 @@ cp -r . ../homepage/others/csharp-learn/
   section: "セクション名",
   title: "レッスン名",
   body: `<p>本文（HTML）</p>`,
-  code: `Console.WriteLine("例");`,
+  code: `Console.WriteLine("まとめの例");`,
   questions: [
-    { q: "問題", options: ["A", "B"], answer: 1, explain: "解説" }
+    { q: "選択式の問題", options: ["A", "B"], answer: 1, explain: "解説" },
+    { type: "input", q: "入力式の問題", answers: ["解答"], explain: "解説" }
   ]
 }
 ```
