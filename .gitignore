@@ -1,0 +1,14 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Nix / direnv
+result
+result-*
+.direnv/
+
+# Local working directories (never committed)
+.commandcode/
+AGENTS.md
